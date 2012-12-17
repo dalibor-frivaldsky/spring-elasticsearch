@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.springframework.beans.factory.FactoryBean;
@@ -70,10 +71,15 @@ public class ElasticsearchTransportClientFactoryBean extends ElasticsearchAbstra
 	
 	@Override
 	protected Client buildClient() throws Exception {
-		Settings settings = ImmutableSettings.settingsBuilder()
-				.loadFromClasspath(this.settingsFile)
-				.build();
-
+		Builder settingsBuilder = ImmutableSettings.settingsBuilder()
+				.loadFromClasspath(this.settingsFile);
+		
+		if (null != this.settings) {
+			settingsBuilder.put(this.settings);
+		}
+		
+		Settings settings = settingsBuilder.build();
+		
 		TransportClient client = new TransportClient(settings);
 
 		for (int i = 0; i < esNodes.length; i++) {
